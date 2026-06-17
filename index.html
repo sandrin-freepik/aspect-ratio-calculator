@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aspect Ratio Calculator — Magnific</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #111111; color: #e8e6e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; min-height: 100vh; padding: 32px 24px; }
+  .top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+  .header h1 { font-size: 18px; font-weight: 600; color: #ffffff; margin-bottom: 4px; }
+  .header p { font-size: 13px; color: #888880; }
+  .lang-toggle { display: flex; gap: 4px; }
+  .lang-btn { background: #111111; border: 0.5px solid #2e2e2e; border-radius: 6px; color: #888880; font-size: 12px; font-weight: 600; padding: 6px 12px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.04em; }
+  .lang-btn.active { background: #222220; border-color: #555550; color: #e8e6e0; }
+  .card { background: #1a1a1a; border: 0.5px solid #2e2e2e; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .card-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #666660; margin-bottom: 16px; }
+  .inputs-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .input-group { flex: 1; }
+  .input-group label { display: block; font-size: 11px; color: #888880; margin-bottom: 6px; }
+  .input-group input { width: 100%; background: #111111; border: 0.5px solid #2e2e2e; border-radius: 6px; color: #e8e6e0; font-size: 15px; font-weight: 500; padding: 10px 12px; outline: none; transition: border-color 0.15s; }
+  .input-group input:focus { border-color: #555550; }
+  .input-group input::placeholder { color: #444440; }
+  .divider-x { color: #444440; font-size: 18px; font-weight: 300; padding-top: 20px; }
+  .unit-selector { display: flex; flex-direction: column; gap: 4px; padding-top: 18px; }
+  .unit-btn { background: #111111; border: 0.5px solid #2e2e2e; border-radius: 5px; color: #888880; font-size: 11px; font-weight: 600; padding: 4px 8px; cursor: pointer; transition: all 0.15s; text-align: center; }
+  .unit-btn.active { background: #222220; border-color: #555550; color: #e8e6e0; }
+  .orientation-toggle { display: flex; gap: 8px; }
+  .orientation-btn { flex: 1; background: #111111; border: 0.5px solid #2e2e2e; border-radius: 6px; color: #888880; font-size: 12px; padding: 8px 6px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .orientation-btn.active { background: #222220; border-color: #555550; color: #e8e6e0; }
+  .orientation-icon { display: inline-block; border: 1.5px solid currentColor; border-radius: 2px; }
+  .icon-h { width: 16px; height: 11px; }
+  .icon-v { width: 11px; height: 16px; }
+  .icon-s { width: 13px; height: 13px; }
+  .result-card { background: #1a1a1a; border: 0.5px solid #2e2e2e; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .result-main { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+  .result-ratio { font-size: 28px; font-weight: 600; color: #ffffff; letter-spacing: -0.02em; }
+  .result-label { font-size: 13px; color: #888880; }
+  .result-decimal { font-size: 13px; color: #555550; margin-bottom: 20px; }
+  .preview-label { font-size: 11px; color: #555550; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .preview-box-wrapper { display: flex; justify-content: center; align-items: center; height: 120px; }
+  .preview-box { background: #222220; border: 0.5px solid #3a3a38; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .preview-dims { font-size: 11px; color: #555550; }
+  .models-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .model-row { background: #111111; border: 0.5px solid #222220; border-radius: 8px; padding: 12px 14px; }
+  .model-row.best { border-color: #3a5a3a; background: #131813; }
+  .model-name { font-size: 11px; font-weight: 600; color: #888880; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .model-ratio { font-size: 15px; font-weight: 600; color: #e8e6e0; margin-bottom: 3px; }
+  .model-ratio.best-match { color: #7dc97d; }
+  .model-diff { font-size: 11px; color: #555550; }
+  .model-diff.exact { color: #7dc97d; }
+  .best-badge { display: inline-block; background: #1f3a1f; color: #7dc97d; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-left: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .empty-state { text-align: center; padding: 40px 20px; color: #444440; font-size: 13px; }
+  .empty-icon { font-size: 28px; margin-bottom: 10px; opacity: 0.4; }
+  .tip { background: #161614; border: 0.5px solid #2a2a28; border-radius: 8px; padding: 12px 14px; font-size: 12px; color: #666660; line-height: 1.6; }
+  .tip strong { color: #888880; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="header">
+    <h1 id="t-title">Aspect Ratio Calculator</h1>
+    <p id="t-subtitle">Enter real-world dimensions to find the best aspect ratio for Magnific models</p>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" id="btn-es" onclick="setLang('es')">ES</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title" id="t-dims">Dimensions</div>
+  <div class="inputs-row">
+    <div class="input-group">
+      <label id="t-width">Width</label>
+      <input type="number" id="width" placeholder="e.g. 3.2" step="0.01" min="0" oninput="calculate()">
+    </div>
+    <div class="divider-x">×</div>
+    <div class="input-group">
+      <label id="t-height">Height</label>
+      <input type="number" id="height" placeholder="e.g. 2.1" step="0.01" min="0" oninput="calculate()">
+    </div>
+    <div class="unit-selector">
+      <button class="unit-btn active" id="btn-m" onclick="setUnit('m')">m</button>
+      <button class="unit-btn" id="btn-cm" onclick="setUnit('cm')">cm</button>
+    </div>
+  </div>
+  <div class="orientation-toggle">
+    <button class="orientation-btn active" id="btn-auto" onclick="setOrientation('auto')" data-key="auto">Auto</button>
+    <button class="orientation-btn" id="btn-h" onclick="setOrientation('horizontal')" data-key="horizontal"><span class="orientation-icon icon-h"></span> <span id="t-h">Horizontal</span></button>
+    <button class="orientation-btn" id="btn-v" onclick="setOrientation('vertical')" data-key="vertical"><span class="orientation-icon icon-v"></span> <span id="t-v">Vertical</span></button>
+    <button class="orientation-btn" id="btn-s" onclick="setOrientation('square')" data-key="square"><span class="orientation-icon icon-s"></span> <span id="t-s">Square</span></button>
+  </div>
+</div>
+
+<div id="result-section">
+  <div class="result-card">
+    <div class="empty-state">
+      <div class="empty-icon">⬚</div>
+      <span id="t-empty">Enter width and height to see results</span>
+    </div>
+  </div>
+</div>
+
+<div class="tip" id="t-tip">
+  <strong>How to use:</strong> Enter the real dimensions of the surface you want to generate — wall, mural, floor... The calculator shows which aspect ratio to select in each Magnific model for the closest visual match.
+</div>
+
+<script>
+const MODELS = {
+  'Nano Banana 2': ['1:1','4:3','3:4','16:9','9:16','3:2','2:3','21:9'],
+  'Nano Banana Pro': ['1:1','4:3','3:4','16:9','9:16','3:2','2:3','21:9'],
+  'GPT 2': ['1:1','4:3','3:4','16:9','9:16'],
+  'Seedance 2.0': ['16:9','9:16','1:1','4:3','3:4'],
+  'Kling 3.0': ['16:9','9:16','1:1','4:3','3:4'],
+  'Flux 2.0': ['1:1','4:3','3:4','16:9','9:16','3:2','2:3'],
+};
+
+const STRINGS = {
+  en: {
+    title: 'Aspect Ratio Calculator',
+    subtitle: 'Enter real-world dimensions to find the best aspect ratio for Magnific models',
+    dims: 'Dimensions',
+    width: 'Width',
+    height: 'Height',
+    auto: 'Auto',
+    horizontal: 'Horizontal',
+    vertical: 'Vertical',
+    square: 'Square',
+    empty: 'Enter width and height to see results',
+    tip: '<strong>How to use:</strong> Enter the real dimensions of the surface you want to generate — wall, mural, floor... The calculator shows which aspect ratio to select in each Magnific model for the closest visual match.',
+    closestRatio: 'closest standard ratio',
+    bestPerModel: 'Best ratio per model',
+    best: 'Best',
+    exact: 'Exact match',
+    off: '% off',
+    preview: 'Proportions preview',
+    phW: 'e.g. 3.2',
+    phH: 'e.g. 2.1',
+  },
+  es: {
+    title: 'Calculadora de Aspect Ratio',
+    subtitle: 'Introduce las dimensiones reales para encontrar el mejor aspect ratio en los modelos de Magnific',
+    dims: 'Dimensiones',
+    width: 'Ancho',
+    height: 'Alto',
+    auto: 'Auto',
+    horizontal: 'Horizontal',
+    vertical: 'Vertical',
+    square: 'Cuadrado',
+    empty: 'Introduce ancho y alto para ver los resultados',
+    tip: '<strong>Cómo usar:</strong> Introduce las dimensiones reales de la superficie que quieres generar — pared, mural, suelo... La calculadora te indica qué aspect ratio seleccionar en cada modelo de Magnific para el resultado más cercano.',
+    closestRatio: 'ratio estándar más cercano',
+    bestPerModel: 'Mejor ratio por modelo',
+    best: 'Mejor',
+    exact: 'Coincidencia exacta',
+    off: '% de diferencia',
+    preview: 'Vista previa de proporciones',
+    phW: 'ej. 3.2',
+    phH: 'ej. 2.1',
+  }
+};
+
+let lang = 'en';
+let unit = 'm';
+let orientation = 'auto';
+
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l==='en');
+  document.getElementById('btn-es').classList.toggle('active', l==='es');
+  const s = STRINGS[l];
+  document.getElementById('t-title').textContent = s.title;
+  document.getElementById('t-subtitle').textContent = s.subtitle;
+  document.getElementById('t-dims').textContent = s.dims;
+  document.getElementById('t-width').textContent = s.width;
+  document.getElementById('t-height').textContent = s.height;
+  document.getElementById('t-h').textContent = s.horizontal;
+  document.getElementById('t-v').textContent = s.vertical;
+  document.getElementById('t-s').textContent = s.square;
+  document.getElementById('t-tip').innerHTML = s.tip;
+  document.getElementById('width').placeholder = s.phW;
+  document.getElementById('height').placeholder = s.phH;
+  document.querySelector('#btn-auto').childNodes[0].textContent = s.auto;
+  calculate();
+}
+
+function setUnit(u) {
+  unit = u;
+  document.getElementById('btn-m').classList.toggle('active', u==='m');
+  document.getElementById('btn-cm').classList.toggle('active', u==='cm');
+  calculate();
+}
+
+function setOrientation(o) {
+  orientation = o;
+  document.getElementById('btn-auto').classList.toggle('active', o==='auto');
+  document.getElementById('btn-h').classList.toggle('active', o==='horizontal');
+  document.getElementById('btn-v').classList.toggle('active', o==='vertical');
+  document.getElementById('btn-s').classList.toggle('active', o==='square');
+  calculate();
+}
+
+function ratioToDecimal(r) { const [w,h]=r.split(':').map(Number); return w/h; }
+
+function simplifyRatio(w, h, o) {
+  let ratio = w/h;
+  if (o==='horizontal') ratio = Math.max(w,h)/Math.min(w,h);
+  else if (o==='vertical') ratio = Math.min(w,h)/Math.max(w,h);
+  else if (o==='square') return '1:1';
+  const common = [[21,9],[16,9],[3,2],[4,3],[1,1],[3,4],[2,3],[9,16]];
+  let best=common[0], bestD=Infinity;
+  common.forEach(([rw,rh])=>{ const d=Math.abs(rw/rh-ratio); if(d<bestD){bestD=d;best=[rw,rh];} });
+  return best[0]+':'+best[1];
+}
+
+function calculate() {
+  const s = STRINGS[lang];
+  const wRaw = parseFloat(document.getElementById('width').value);
+  const hRaw = parseFloat(document.getElementById('height').value);
+
+  if (!wRaw||!hRaw||wRaw<=0||hRaw<=0) {
+    document.getElementById('result-section').innerHTML = `<div class="result-card"><div class="empty-state"><div class="empty-icon">⬚</div><span>${s.empty}</span></div></div>`;
+    return;
+  }
+
+  // Convert to meters for display label
+  const wDisplay = unit==='cm' ? (wRaw/100).toFixed(2) : wRaw;
+  const hDisplay = unit==='cm' ? (hRaw/100).toFixed(2) : hRaw;
+  const unitLabel = unit==='cm' ? 'cm' : 'm';
+
+  let target = wRaw/hRaw;
+  if (orientation==='horizontal') target = Math.max(wRaw,hRaw)/Math.min(wRaw,hRaw);
+  else if (orientation==='vertical') target = Math.min(wRaw,hRaw)/Math.max(wRaw,hRaw);
+  else if (orientation==='square') target = 1;
+
+  const simplified = simplifyRatio(wRaw, hRaw, orientation);
+  const decimal = target.toFixed(3);
+
+  let globalBest=null, globalBestDiff=Infinity;
+  Object.entries(MODELS).forEach(([name,ratios])=>{
+    ratios.forEach(r=>{ const d=Math.abs(ratioToDecimal(r)-target); if(d<globalBestDiff){globalBestDiff=d;globalBest={model:name,ratio:r};} });
+  });
+
+  let modelsHTML='';
+  Object.entries(MODELS).forEach(([name,ratios])=>{
+    let best=null, bestD=Infinity;
+    ratios.forEach(r=>{ const d=Math.abs(ratioToDecimal(r)-target); if(d<bestD){bestD=d;best=r;} });
+    const isBest = globalBest&&globalBest.model===name;
+    const pct = (bestD/target*100).toFixed(1);
+    const exact = bestD<0.01;
+    modelsHTML += `<div class="model-row ${isBest?'best':''}">
+      <div class="model-name">${name}${isBest?`<span class="best-badge">${s.best}</span>`:''}</div>
+      <div class="model-ratio ${isBest?'best-match':''}">${best}</div>
+      <div class="model-diff ${exact?'exact':''}">${exact?s.exact:'~'+pct+s.off}</div>
+    </div>`;
+  });
+
+  let pW, pH;
+  if (target>=1) { pW=200; pH=Math.round(200/target); }
+  else { pH=100; pW=Math.round(100*target); }
+  pW=Math.max(pW,40); pH=Math.max(pH,40);
+
+  document.getElementById('result-section').innerHTML = `
+    <div class="result-card">
+      <div class="result-main"><div class="result-ratio">${simplified}</div><div class="result-label">${s.closestRatio}</div></div>
+      <div class="result-decimal">${wRaw}${unitLabel} × ${hRaw}${unitLabel} &nbsp;·&nbsp; ratio: ${decimal}</div>
+      <div class="preview-label">${s.preview}</div>
+      <div class="preview-box-wrapper">
+        <div class="preview-box" style="width:${pW}px;height:${pH}px;"><span class="preview-dims">${wRaw}×${hRaw}${unitLabel}</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">${s.bestPerModel}</div>
+      <div class="models-grid">${modelsHTML}</div>
+    </div>`;
+}
+</script>
+</body>
+</html>
