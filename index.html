@@ -84,6 +84,7 @@
     <div class="unit-selector">
       <button class="unit-btn active" id="btn-m" onclick="setUnit('m')">m</button>
       <button class="unit-btn" id="btn-cm" onclick="setUnit('cm')">cm</button>
+      <button class="unit-btn" id="btn-px" onclick="setUnit('px')">px</button>
     </div>
   </div>
   <div class="orientation-toggle">
@@ -136,8 +137,8 @@ const STRINGS = {
     exact: 'Exact match',
     off: '% off',
     preview: 'Proportions preview',
-    phW: 'e.g. 3.2',
-    phH: 'e.g. 2.1',
+    phW: 'e.g. 1920',
+    phH: 'e.g. 1080',
   },
   es: {
     title: 'Calculadora de Aspect Ratio',
@@ -150,15 +151,15 @@ const STRINGS = {
     vertical: 'Vertical',
     square: 'Cuadrado',
     empty: 'Introduce ancho y alto para ver los resultados',
-    tip: '<strong>Cómo usar:</strong> Introduce las dimensiones reales de la superficie que quieres generar — pared, mural, suelo... La calculadora te indica qué aspect ratio seleccionar en cada modelo de Magnific para el resultado más cercano.',
+    tip: '<strong>Cómo usar:</strong> Introduce las dimensiones reales de la superficie que quieres generar — pared, mural, suelo, banner, post... La calculadora te indica qué aspect ratio seleccionar en cada modelo de Magnific para el resultado más cercano.',
     closestRatio: 'ratio estándar más cercano',
     bestPerModel: 'Mejor ratio por modelo',
     best: 'Mejor',
     exact: 'Coincidencia exacta',
     off: '% de diferencia',
     preview: 'Vista previa de proporciones',
-    phW: 'ej. 3.2',
-    phH: 'ej. 2.1',
+    phW: 'ej. 1920',
+    phH: 'ej. 1080',
   }
 };
 
@@ -190,6 +191,7 @@ function setUnit(u) {
   unit = u;
   document.getElementById('btn-m').classList.toggle('active', u==='m');
   document.getElementById('btn-cm').classList.toggle('active', u==='cm');
+  document.getElementById('btn-px').classList.toggle('active', u==='px');
   calculate();
 }
 
@@ -228,7 +230,7 @@ function calculate() {
   // Convert to meters for display label
   const wDisplay = unit==='cm' ? (wRaw/100).toFixed(2) : wRaw;
   const hDisplay = unit==='cm' ? (hRaw/100).toFixed(2) : hRaw;
-  const unitLabel = unit==='cm' ? 'cm' : 'm';
+  const unitLabel = unit==='cm' ? 'cm' : unit==='px' ? 'px' : 'm';
 
   let target = wRaw/hRaw;
   if (orientation==='horizontal') target = Math.max(wRaw,hRaw)/Math.min(wRaw,hRaw);
